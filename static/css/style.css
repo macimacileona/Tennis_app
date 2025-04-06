@@ -1,0 +1,92 @@
+/* ===== HEADER STYLES ===== */
+.header-wrapper {
+    margin-bottom: 2rem;
+}
+
+.clay-header {
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tournament-title {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.9);
+    padding: 8px 16px;
+    border-radius: 25px;
+    backdrop-filter: blur(2px);
+}
+
+.welcome-text {
+    color: #5a3921;
+    font-size: 0.95rem;
+}
+
+.username {
+    font-weight: 700;
+    color: #e35205;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.username:hover {
+    text-decoration: underline;
+}
+
+.logout-btn {
+    background: #e35205;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c14403;
+    transform: translateY(-1px);
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .tournament-title {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .clay-header {
+        padding: 1.5rem;
+    }
+}
