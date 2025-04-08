@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}User Profile{% endblock %}
-
 {% block content %}
 <div class="container mt-5">
   <div class="row justify-content-center">
@@ -11,7 +9,7 @@
           <h3>User Profile</h3>
         </div>
         <div class="card-body">
-          <!-- Form now posts to update_profile endpoint -->
+          <!-- Form posts to update_profile endpoint -->
           <form method="POST" action="{{ url_for('update_profile') }}">
             <div class="row mb-4">
               <div class="col-md-4 text-center">
@@ -23,74 +21,100 @@
               <div class="col-md-8">
                 <h5>Account Information</h5>
                 <hr>
-                <!-- Each row: Label and Input on the same line -->
+                <!-- First Name -->
+                <div class="row mb-2 align-items-center">
+                  <div class="col-sm-3">
+                    <label for="first_name" class="form-label">Ime</label>
+                  </div>
+                  <div class="col-sm-9">
+                    <input type="text" class="form-control" id="first_name" name="first_name"
+                           value="{{ user.first_name }}" required>
+                  </div>
+                </div>
+                <!-- Last Name -->
+                <div class="row mb-2 align-items-center">
+                  <div class="col-sm-3">
+                    <label for="last_name" class="form-label">Prezime</label>
+                  </div>
+                  <div class="col-sm-9">
+                    <input type="text" class="form-control" id="last_name" name="last_name"
+                           value="{{ user.last_name }}" required>
+                  </div>
+                </div>
+                <!-- Email -->
                 <div class="row mb-2 align-items-center">
                   <div class="col-sm-3">
                     <label for="email" class="form-label">Email</label>
                   </div>
                   <div class="col-sm-9">
-                    <input type="email" class="form-control" id="email" name="email" 
+                    <input type="email" class="form-control" id="email" name="email"
                            value="{{ user.email }}" required>
                   </div>
                 </div>
+                <!-- Phone -->
                 <div class="row mb-2 align-items-center">
                   <div class="col-sm-3">
-                    <label for="phone" class="form-label">Phone Number</label>
+                    <label for="phone" class="form-label">Telefon</label>
                   </div>
                   <div class="col-sm-9">
-                    <input type="tel" class="form-control" id="phone" name="phone" 
-                           value="{{ user.phone }}" pattern="\+?[0-9]+" title="Only numbers and optional + sign allowed">
+                    <input type="number" class="form-control" id="phone" name="phone"
+                           value="{{ user.phone }}" required>
                   </div>
                 </div>
+                <!-- Win Ratio (readonly) -->
                 <div class="row mb-2 align-items-center">
                   <div class="col-sm-3">
-                    <label for="win_ratio" class="form-label">Win Ratio</label>
+                    <label for="win_ratio" class="form-label">Omjer pobjeda</label>
                   </div>
                   <div class="col-sm-9">
-                    <input type="text" class="form-control" id="win_ratio" name="win_ratio" 
+                    <input type="text" class="form-control" id="win_ratio" name="win_ratio"
                            value="{{ user.win_ratio }}" readonly placeholder="Will be calculated">
                   </div>
                 </div>
+                <!-- Weight -->
                 <div class="row mb-2 align-items-center">
                   <div class="col-sm-3">
-                    <label for="weight" class="form-label">Weight (kg)</label>
+                    <label for="weight" class="form-label">Težina (kg)</label>
                   </div>
                   <div class="col-sm-9">
-                    <input type="number" class="form-control" id="weight" name="weight" 
+                    <input type="number" class="form-control" id="weight" name="weight"
                            value="{{ user.weight }}" min="30" max="200" step="1">
                   </div>
                 </div>
+                <!-- Height -->
                 <div class="row mb-2 align-items-center">
                   <div class="col-sm-3">
-                    <label for="height" class="form-label">Height (cm)</label>
+                    <label for="height" class="form-label">Visina (cm)</label>
                   </div>
                   <div class="col-sm-9">
-                    <input type="number" class="form-control" id="height" name="height" 
+                    <input type="number" class="form-control" id="height" name="height"
                            value="{{ user.height }}" min="100" max="250" step="1">
                   </div>
                 </div>
+                <!-- Year of Birth -->
                 <div class="row mb-2 align-items-center">
                   <div class="col-sm-3">
-                    <label for="birth_year" class="form-label">Year of Birth</label>
+                    <label for="birth_year" class="form-label">Godina rođenja</label>
                   </div>
                   <div class="col-sm-9">
-                    <input type="number" class="form-control" id="birth_year" name="birth_year" 
-                           value="{{ user.birth_year }}" min="1900" max="2023" step="1">
+                    <input type="number" class="form-control" id="birth_year" name="birth_year"
+                           value="{{ user.birth_year }}" min="1900" max="2023" step="1" required>
                   </div>
                 </div>
+                <!-- Handedness -->
                 <div class="row mb-2 align-items-center">
                   <div class="col-sm-3">
-                    <label for="handedness" class="form-label">Handedness</label>
+                    <label for="handedness" class="form-label">Igra s rukom</label>
                   </div>
                   <div class="col-sm-9">
-                    <select class="form-select" id="handedness" name="handedness">
-                      <option value="">Select...</option>
-                      <option value="left" {% if user.handedness == 'left' %}selected{% endif %}>Left</option>
-                      <option value="right" {% if user.handedness == 'right' %}selected{% endif %}>Right</option>
+                    <select class="form-select" id="handedness" name="handedness" required>
+                      <option value="" disabled>Select...</option>
+                      <option value="left" {% if user.handedness == 'left' %}selected{% endif %}>Lijeva</option>
+                      <option value="right" {% if user.handedness == 'right' %}selected{% endif %}>Desna</option>
                     </select>
                   </div>
                 </div>
-                <!-- Action Buttons Centered and Next to Each Other -->
+                <!-- Action Buttons -->
                 <div class="row mt-4">
                   <div class="col d-flex justify-content-center gap-3">
                     <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
@@ -105,11 +129,4 @@
     </div>
   </div>
 </div>
-
-<!-- Script for phone number validation -->
-<script>
-document.getElementById('phone').addEventListener('input', function(e) {
-    this.value = this.value.replace(/[^0-9+]/g, '');
-});
-</script>
 {% endblock %}

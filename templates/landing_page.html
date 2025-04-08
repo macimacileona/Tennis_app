@@ -1,81 +1,59 @@
 {% extends "base.html" %}
-{% block title %}Sebastian! Championship 2025{% endblock %}
+{% block title %}Landing Page{% endblock %}
 {% block content %}
-<style>
-  /* Header container with a clay tennis court background */
-  .header-container {
-  position: relative;
-  text-align: center;
-  padding: 2rem 0;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)),
-                    url('https://th.bing.com/th/id/OIP.76g7U8pSjcvIZiC8rShvlgHaFj?w=288&h=216&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2');
-  background-size: cover;
-  background-position: center;
-  color: #fff;
-}
-
-  .tournament-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin: 0;
-  }
-
-  /* User info positioned at the top-right */
-  .user-info {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-  }
-
-  .user-info a {
-    color: #fff;
-    text-decoration: underline;
-  }
-
-  .logout-btn {
-    background-color: #dc3545;
-    border: none;
-    padding: 0.5rem 1rem;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-
-  .logout-btn:hover {
-    background-color: #c82333;
-  }
-</style>
-
+<!-- Header with clay court background -->
 <div class="header-container">
-  <h1 class="tournament-title">Sebastian Championship 2025</h1>
+  <div class="header-title">Sebastian Championship 2025</div>
   <div class="user-info">
-    <span>Welcome, <a href="{{ url_for('profile') }}">tomislav.markac</a></span>
-    <form action="{{ url_for('logout') }}" method="post" style="margin: 0;">
-      <button type="submit" class="logout-btn">Logout</button>
-    </form>
+    <span>Welcome, <strong><a href="/profile" style="color: #fff; text-decoration: underline;">tomislav.markac</a></strong></span>
+    <a href="/logout" class="logout-btn">Logout</a>
   </div>
 </div>
 
-<div class="main-content">
-  <!-- Your landing page main content goes here -->
+<!-- Left-hand side menu -->
+<div class="left-menu">
+  <a href="#">Rezultati</a>
+  <a href="#">Najave</a>
+  <a href="#">Dodaj rezultat</a>
+  <a href="#">Najavi meč</a>
+  <a href="#">Traži</a>
+  <a href="#">Informacije</a>
+  <a href="#">Kontakt</a>
+  {% if session.get('role') == 'admin' %}
+    <a href="{{ url_for('admin_dashboard') }}" class="admin-menu">Admin</a>
+  {% endif %}
 </div>
 
-<!-- Auto-hide flash messages after 5 seconds -->
-<script>
-  window.setTimeout(function() {
-    var alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
-      alert.style.transition = 'opacity 0.5s ease-out';
-      alert.style.opacity = '0';
-      setTimeout(function() {
-        alert.remove();
-      }, 500);
-    });
-  }, 5000);
-</script>
+<!-- Main content area -->
+<div class="main-content">
+  <h2>Main Landing Content</h2>
+  <p>This is where your landing page content goes.</p>
+  <!-- Table with six columns and 10 empty rows -->
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Igrač</th>
+          <th>Odigrano</th>
+          <th>Pobjede</th>
+          <th>Setovi</th>
+          <th>Gemovi</th>
+          <th>Bodovi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range(10) %}
+        <tr>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

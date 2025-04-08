@@ -1,92 +1,142 @@
-/* ===== HEADER STYLES ===== */
-.header-wrapper {
-    margin-bottom: 2rem;
-}
-
-.clay-header {
-    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
-                url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
-    background-size: cover;
-    background-position: center;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.tournament-title {
-    color: white;
-    font-size: 2rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+/* Global box-sizing */
+* {
+    box-sizing: border-box;
+  }
+  
+  /* Body with white background */
+  body {
     margin: 0;
-    flex-grow: 1;
+    background-color: #fff;
+  }
+  
+  /* ===== HEADER STYLES ===== */
+  .header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px; /* Reduced header height */
+    background: url('https://images.unsplash.com/photo-1605875200273-a63d6a51f9e1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80')
+                no-repeat center center/cover;
+    z-index: 1050;
+    color: #fff;
+  }
+  .header-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 0;
+  }
+  .header-title {
+    position: relative;
+    z-index: 1;
     text-align: center;
-}
-
-.user-section {
+    line-height: 80px; /* Match header height */
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  /* ===== USER INFO ===== */
+  .user-info {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 2;
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: rgba(255,255,255,0.9);
-    padding: 8px 16px;
-    border-radius: 25px;
-    backdrop-filter: blur(2px);
-}
-
-.welcome-text {
-    color: #5a3921;
-    font-size: 0.95rem;
-}
-
-.username {
-    font-weight: 700;
-    color: #e35205;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.username:hover {
-    text-decoration: underline;
-}
-
-.logout-btn {
-    background: #e35205;
-    color: white;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: #fff;
+  }
+  
+  /* ===== LOGOUT BUTTON STYLING ===== */
+  .logout-btn {
+    background-color: #dc3545;
     border: none;
-    padding: 6px 12px;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.2s;
-}
-
-.logout-btn:hover {
-    background: #c14403;
-    transform: translateY(-1px);
-}
-
-/* ===== MOBILE RESPONSIVENESS ===== */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        gap: 1rem;
+    text-decoration: none;
+    font-size: 1rem;
+  }
+  .logout-btn:hover {
+    background-color: #c82333;
+  }
+  
+  /* ===== LEFT-HAND SIDE MENU ===== */
+  .left-menu {
+    position: fixed;
+    top: 80px; /* Starts just below the header */
+    left: 0;
+    width: 150px; /* Adjusted menu width */
+    background-color: #343a40;
+    padding: 1rem;
+    overflow-y: auto;
+    z-index: 1040;
+  }
+  .left-menu a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 5px;
+  }
+  .left-menu a:hover {
+    background-color: #495057;
+  }
+  
+  /* ===== ADMIN MENU OPTION ===== */
+  .admin-menu {
+    font-weight: bold;
+    color: #fff;
+    background-color: #ff9800; /* Distinct color for admin */
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin-top: 1rem;
+    display: block;
+    text-decoration: none;
+  }
+  .admin-menu:hover {
+    background-color: #e68900;
+  }
+  
+  /* ===== MAIN CONTENT ===== */
+  .main-content {
+    margin-top: 80px;  /* Space below header */
+    margin-left: 150px; /* Exactly the width of the left menu */
+    padding: 1rem;
+    min-height: 100vh; /* Ensure main content extends full height */
+    background-color: #fff;
+  }
+  
+  /* ===== FLASH MESSAGES ===== */
+  .alert {
+    margin-top: 1rem;
+  }
+  
+  /* ===== RESPONSIVE STYLES ===== */
+  @media (max-width: 768px) {
+    .header-container {
+      height: 60px;
     }
-    
-    .tournament-title {
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
+    .header-title {
+      line-height: 60px;
+      font-size: 1.5rem;
     }
-    
-    .clay-header {
-        padding: 1.5rem;
+    .left-menu {
+      top: 60px;
+      width: 120px;
     }
-}
+    .main-content {
+      margin-top: 60px;
+      margin-left: 120px;
+    }
+  }
+  

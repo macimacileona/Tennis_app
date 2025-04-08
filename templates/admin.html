@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Admin Dashboard</h2>
+  <p>Select players for the tournament:</p>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Player Name</th>
+        <th>Year of Birth</th>
+        <th>Total Matches</th>
+        <th>Win</th>
+        <th>Loss</th>
+        <th>Win %</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>
+          <a href="{{ url_for('profile_by_username', username=user.username) }}">
+            {{ user.first_name }} {{ user.last_name }}
+          </a>
+        </td>
+        <td>{{ user.birth_year }}</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0%</td>
+        <td>
+          <button class="btn btn-success btn-sm">Add Player</button>
+          <button class="btn btn-danger btn-sm">Remove Player</button>
+          <button class="btn btn-warning btn-sm">Freeze Player</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
