@@ -1,17 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
+# Optionally, if you wish to use Flask-Migrate for schema changes:
+# from flask_migrate import Migrate
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Change for production
+app.secret_key = 'your_secret_key_here'  # Change this for production
 
 # Configure SQLAlchemy to use an SQLite database called users.db
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
+# Initialize migrations (optional, recommended for production)
+# migrate = Migrate(app, db)
 
-# Define the User model (including a role field)
+# Define the User model (updated with participant column)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(80), nullable=False)
@@ -22,12 +25,23 @@ class User(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     birth_year = db.Column(db.Integer, nullable=False)
     handedness = db.Column(db.String(10), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='user')  # 'admin' or 'user'
+    role = db.Column(db.String(20), nullable=False, default='user')
+    participant = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return f'<User {self.username}>'
 
-# --- Admin-Only Decorator ---
+# Define the Competition model to store competition details.
+class Competition(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    num_groups = db.Column(db.Integer, nullable=False)
+    max_players = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f'<Competition {self.name}>'
+
+# Admin-only decorator
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -37,7 +51,9 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Registration route (simplified; assumes form collects all necessary fields)
+# Registration, login, forgot-password, profile, update-profile, etc.
+# (Assume these routes are similar to our previous code.)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -49,7 +65,6 @@ def register():
         handedness = request.form['handedness']
         username = request.form['username']
         password = request.form['password']
-
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'danger')
         else:
@@ -69,7 +84,6 @@ def register():
             return redirect(url_for('login'))
     return render_template('register.html')
 
-# Login route (stores role in session)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -79,14 +93,13 @@ def login():
         if user:
             session['username'] = user.username
             session['email'] = user.email
-            session['role'] = user.role  # Store role
+            session['role'] = user.role
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
         else:
             flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
-# Forgot Password route
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -95,14 +108,12 @@ def forgot_password():
         return redirect(url_for('login'))
     return render_template('forgot_password.html')
 
-# Home route (landing page)
 @app.route('/')
 def home():
     if 'username' in session:
         return render_template('landing_page.html')
     return redirect(url_for('login'))
 
-# Profile route for logged-in user
 @app.route('/profile')
 def profile():
     if 'username' not in session:
@@ -115,7 +126,6 @@ def profile():
         flash('User not found', 'danger')
         return redirect(url_for('login'))
 
-# Profile route for admin viewing any user's profile
 @app.route('/profile/<username>')
 def profile_by_username(username):
     user = User.query.filter_by(username=username).first()
@@ -125,7 +135,6 @@ def profile_by_username(username):
         flash('User not found', 'danger')
         return redirect(url_for('admin_dashboard'))
 
-# Update profile route
 @app.route('/update-profile', methods=['POST'])
 def update_profile():
     if 'username' not in session:
@@ -142,17 +151,67 @@ def update_profile():
         db.session.commit()
         flash('Profile updated successfully!', 'success')
     else:
-        flash('User not found', 'danger')
+        flash('User not found.', 'danger')
     return redirect(url_for('profile'))
 
-# Admin dashboard route (only for admins)
+# Participant management routes
+@app.route('/add-participant/<int:user_id>')
+@admin_required
+def add_participant(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user.participant = True
+        db.session.commit()
+        flash(f"{user.first_name} {user.last_name} has been added as a participant.", "success")
+    else:
+        flash("User not found.", "danger")
+    return redirect(url_for("admin_dashboard"))
+
+@app.route('/remove-participant/<int:user_id>')
+@admin_required
+def remove_participant(user_id):
+    user = User.query.get(user_id)
+    if user:
+        if user.participant:
+            user.participant = False
+            db.session.commit()
+            flash(f"{user.first_name} {user.last_name} has been removed from participants.", "success")
+        else:
+            flash("User is not a participant.", "warning")
+    else:
+        flash("User not found.", "danger")
+    return redirect(url_for("admin_dashboard"))
+
+@app.route('/freeze-participant/<int:user_id>')
+@admin_required
+def freeze_participant(user_id):
+    flash("Freeze functionality is not implemented yet.", "info")
+    return redirect(url_for("admin_dashboard"))
+
+# Competition creation route (persisting competition details)
+@app.route('/create-competition', methods=['POST'])
+@admin_required
+def create_competition():
+    comp_name = request.form.get('compName').strip()
+    num_groups = int(request.form.get('numGroups'))
+    max_players = int(request.form.get('maxPlayers'))
+    new_comp = Competition(name=comp_name, num_groups=num_groups, max_players=max_players)
+    db.session.add(new_comp)
+    db.session.commit()
+    flash("Competition created successfully!", "success")
+    return redirect(url_for("admin_dashboard", active_tab="competition"))
+
+# Admin dashboard route includes competitions
 @app.route('/admin-dashboard')
 @admin_required
 def admin_dashboard():
-    users = User.query.all()
-    return render_template('admin.html', users=users)
+    all_users = User.query.order_by(User.username).all()
+    participants = User.query.filter_by(participant=True).order_by(User.username).all()
+    competitions = Competition.query.order_by(Competition.id).all()
+    # Get active_tab from query parameters (default to 'users')
+    active_tab = request.args.get('active_tab', 'users')
+    return render_template('admin.html', users=all_users, participants=participants, competitions=competitions, active_tab=active_tab)
 
-# Logout route (accessible to everyone)
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.clear()
