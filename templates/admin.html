@@ -10,7 +10,7 @@
   
   <h2 class="mt-3">Admin Dashboard</h2>
   
-  <!-- Outer Tabs: Users, Players, Create Competition -->
+  <!-- Primary Outer Tabs: Users, Players, Create Competition -->
   <ul class="nav nav-tabs" id="adminTab" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link {% if active_tab=='users' %}active{% endif %}" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="{% if active_tab=='users' %}true{% else %}false{% endif %}">
@@ -120,52 +120,99 @@
     <div class="tab-pane fade {% if active_tab=='competition' %}show active{% endif %}" id="competition" role="tabpanel" aria-labelledby="competition-tab">
       <div class="mt-3">
         <p>Total number of players: <strong>{{ participants|length }}</strong></p>
-        <!-- Button to open competition creation modal -->
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#competitionModal">Create Competition</button>
       </div>
       <hr>
-      <h3>Existing Competitions</h3>
-      <!-- Nested tabs for each competition -->
+      <!-- Nested tabs for competitions: each competition in its own tab -->
       {% if competitions %}
-        <ul class="nav nav-tabs mt-3" id="compNav" role="tablist">
-          {% for comp in competitions %}
-            <li class="nav-item" role="presentation">
-              <button class="nav-link {% if loop.first %}active{% endif %}" id="comp-{{ comp.id }}-tab" data-bs-toggle="tab" data-bs-target="#comp-{{ comp.id }}" type="button" role="tab" aria-controls="comp-{{ comp.id }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-                {{ comp.name }}
-              </button>
-            </li>
-          {% endfor %}
-        </ul>
-        <div class="tab-content mt-3" id="compNavContent">
-          {% for comp in competitions %}
-            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="comp-{{ comp.id }}" role="tabpanel" aria-labelledby="comp-{{ comp.id }}-tab">
-              {% set groupLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-              {% for i in range(comp.num_groups) %}
-                {% set groupName = "Group " + groupLetters[i] %}
-                <div class="mt-3">
-                  <h5>{{ groupName }}</h5>
-                  <table class="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th>Player</th>
-                        <th>Score</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td colspan="2" class="text-center">No players assigned yet.</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+      <ul class="nav nav-tabs mt-3" id="compNav" role="tablist">
+        {% for comp in competitions %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if loop.first %}active{% endif %}" id="comp-{{ comp.id }}-tab" data-bs-toggle="tab" data-bs-target="#comp-{{ comp.id }}" type="button" role="tab" aria-controls="comp-{{ comp.id }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
+            {{ comp.name }}
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="tab-content mt-3" id="compNavContent">
+        {% for comp in competitions %}
+        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="comp-{{ comp.id }}" role="tabpanel" aria-labelledby="comp-{{ comp.id }}-tab">
+          <!-- Delete Competition button -->
+          <div class="mb-3">
+            <button class="btn btn-danger btn-sm delete-competition-btn" data-comp-id="{{ comp.id }}">Delete Competition</button>
+          </div>
+          {# Calculate assigned IDs for this competition across all groups #}
+          {% set assigned_ids = [] %}
+          {% if assignments.get(comp.id) %}
+            {% for group_assignments in assignments.get(comp.id).values() %}
+              {% for assign in group_assignments %}
+                {% if assign.user_id not in assigned_ids %}
+                  {% set _ = assigned_ids.append(assign.user_id) %}
+                {% endif %}
               {% endfor %}
+            {% endfor %}
+          {% endif %}
+          {% set groupLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+          {% for i in range(comp.num_groups) %}
+          {% set groupName = "Group " ~ groupLetters[i] %}
+          <div class="group-container mt-4" data-competition-id="{{ comp.id }}" data-group-index="{{ i }}">
+            <!-- Dropdown list of players, excluding those already assigned in this competition -->
+            <div class="d-flex align-items-center mb-2">
+              <h5 class="mb-0 me-2">{{ groupName }}</h5>
+              <select class="form-select player-dropdown" style="max-width: 300px;">
+                <option value="">Select Player</option>
+                {% for p in all_possible_players|sort(attribute='last_name') if p.id not in assigned_ids %}
+                  <option value="{{ p.id }}">{{ p.last_name }}, {{ p.first_name }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-sm btn-primary ms-2 add-player-btn">Add Player</button>
             </div>
+            <table class="table table-bordered group-table">
+              <thead>
+                <tr>
+                  <th>Player Name</th>
+                  <th>Year of Birth</th>
+                  <th>Total Matches</th>
+                  <th>Win</th>
+                  <th>Loss</th>
+                  <th>Win %</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set assignments_for_group = assignments.get(comp.id, {}).get(i, []) %}
+                {% for r in range(comp.max_players) %}
+                  {% if r < assignments_for_group|length %}
+                    {% set assign = assignments_for_group[r] %}
+                    {% set assigned_player = (all_possible_players | selectattr("id", "equalto", assign.user_id) | list)[0] %}
+                    <tr data-player-id="{{ assigned_player.id }}">
+                      <td>{{ assigned_player.last_name }}, {{ assigned_player.first_name }}</td>
+                      <td>{{ assigned_player.birth_year }}</td>
+                      <td>0</td>
+                      <td>0</td>
+                      <td>0</td>
+                      <td>0%</td>
+                      <td>
+                        <button class="btn btn-sm btn-warning remove-assigned-btn">Remove</button>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr class="group-slot">
+                      <td colspan="7" class="text-center">Empty Slot</td>
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
           {% endfor %}
         </div>
+        {% endfor %}
+      </div>
       {% else %}
-        <p>No competitions created yet.</p>
+      <p>No competitions created yet.</p>
       {% endif %}
-
+      
       <!-- Bootstrap Modal for Competition Creation Form -->
       <div class="modal fade" id="competitionModal" tabindex="-1" aria-labelledby="competitionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -200,4 +247,175 @@
     </div> <!-- End Create Competition Tab -->
   </div>
 </div>
+
+<!-- Inline JavaScript for Player Assignment, Removal, and Competition Deletion -->
+<script>
+// all_possible_players is passed as JSON from the backend.
+var allPossiblePlayers = {{ all_possible_players|tojson }};
+
+// Function to send assignment via AJAX to persist in the database.
+function assignPlayerToGroup(competitionId, groupIndex, playerId) {
+  return fetch("{{ url_for('assign_player') }}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      competition_id: competitionId,
+      group_index: groupIndex,
+      user_id: playerId
+    })
+  }).then(response => response.json());
+}
+
+// Function to send removal of an assignment via AJAX.
+function removeAssignment(competitionId, groupIndex, playerId) {
+  return fetch("{{ url_for('remove_assignment') }}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      competition_id: competitionId,
+      group_index: groupIndex,
+      user_id: playerId
+    })
+  }).then(response => response.json());
+}
+
+// Function to send deletion of a competition via AJAX.
+function deleteCompetition(compId) {
+  return fetch(`/delete-competition/${compId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  }).then(response => response.json());
+}
+
+// Attach event listeners for each group container (for adding players).
+document.querySelectorAll(".group-container").forEach(function(groupContainer) {
+  groupContainer.querySelector(".add-player-btn").addEventListener("click", function() {
+    var dropdown = groupContainer.querySelector(".player-dropdown");
+    var playerId = dropdown.value;
+    if (!playerId) {
+      alert("Please select a player.");
+      return;
+    }
+    var competitionId = groupContainer.getAttribute("data-competition-id");
+    var groupIndex = groupContainer.getAttribute("data-group-index");
+    var player = allPossiblePlayers.find(function(p) {
+      return parseInt(p.id) === parseInt(playerId);
+    });
+    if (!player) {
+      alert("Player not found.");
+      return;
+    }
+    assignPlayerToGroup(competitionId, groupIndex, playerId).then(function(data) {
+      if (data.status === "success") {
+        var newRow = document.createElement("tr");
+        newRow.setAttribute("data-player-id", playerId);
+        newRow.innerHTML = `
+          <td>${player.last_name}, ${player.first_name}</td>
+          <td>${player.birth_year}</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0%</td>
+          <td>
+            <button class="btn btn-sm btn-warning remove-assigned-btn">Remove</button>
+          </td>
+        `;
+        var tbody = groupContainer.querySelector(".group-table tbody");
+        var emptyRow = tbody.querySelector("tr.group-slot");
+        if (emptyRow) {
+          tbody.replaceChild(newRow, emptyRow);
+        } else {
+          alert("No empty slots available in this group.");
+        }
+        // Remove this player's option from all dropdowns in this competition.
+        var compDropdowns = document.querySelectorAll(`.group-container[data-competition-id="${competitionId}"] .player-dropdown`);
+        compDropdowns.forEach(function(drop) {
+          drop.querySelectorAll("option").forEach(function(opt) {
+            if (parseInt(opt.value) === parseInt(playerId)) {
+              opt.remove();
+            }
+          });
+        });
+        dropdown.selectedIndex = 0;
+      } else {
+        alert(data.message || "Failed to assign player.");
+      }
+    }).catch(function(err) {
+      console.error(err);
+      alert("Error occurred while assigning player.");
+    });
+  });
+  
+  // Attach event listener for removal of assigned players.
+  groupContainer.addEventListener("click", function(e) {
+    if (e.target && e.target.classList.contains("remove-assigned-btn")) {
+      var tr = e.target.closest("tr");
+      var removedPlayerId = tr.getAttribute("data-player-id");
+      var competitionId = groupContainer.getAttribute("data-competition-id");
+      var groupIndex = groupContainer.getAttribute("data-group-index");
+      removeAssignment(competitionId, groupIndex, removedPlayerId).then(function(data) {
+        if (data.status === "success") {
+          var emptyRow = document.createElement("tr");
+          emptyRow.classList.add("group-slot");
+          emptyRow.innerHTML = `<td colspan="7" class="text-center">Empty Slot</td>`;
+          tr.parentNode.replaceChild(emptyRow, tr);
+          // Re-add the removed player's option to all dropdowns in this competition.
+          var compDropdowns = document.querySelectorAll(`.group-container[data-competition-id="${competitionId}"] .player-dropdown`);
+          compDropdowns.forEach(function(drop) {
+            var exists = Array.from(drop.options).some(function(opt) {
+              return parseInt(opt.value) === parseInt(removedPlayerId);
+            });
+            if (!exists) {
+              var removedPlayer = allPossiblePlayers.find(function(p) {
+                return parseInt(p.id) === parseInt(removedPlayerId);
+              });
+              if (removedPlayer) {
+                var newOption = document.createElement("option");
+                newOption.value = removedPlayer.id;
+                newOption.text = removedPlayer.last_name + ", " + removedPlayer.first_name;
+                drop.appendChild(newOption);
+              }
+            }
+          });
+        } else {
+          alert(data.message || "Failed to remove assigned player.");
+        }
+      }).catch(function(err) {
+        console.error(err);
+        alert("Error occurred while removing assigned player.");
+      });
+    }
+  });
+});
+
+// Attach event listeners for Delete Competition buttons.
+document.querySelectorAll(".delete-competition-btn").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var compId = btn.getAttribute("data-comp-id");
+    var confirmDelete = confirm("Are you sure you want to delete this competition? This will delete all associated data.");
+    if (!confirmDelete) return;
+    deleteCompetition(compId).then(function(data) {
+      if (data.status === "success") {
+        // Remove the competition tab header and content from the DOM.
+        var headerBtn = document.getElementById("comp-" + compId + "-tab");
+        var contentPane = document.getElementById("comp-" + compId);
+        if (headerBtn) headerBtn.parentNode.remove();
+        if (contentPane) contentPane.parentNode.removeChild(contentPane);
+        alert("Competition deleted successfully.");
+      } else {
+        alert(data.message || "Failed to delete competition.");
+      }
+    }).catch(function(err) {
+      console.error(err);
+      alert("Error occurred while deleting competition.");
+    });
+  });
+});
+</script>
 {% endblock %}

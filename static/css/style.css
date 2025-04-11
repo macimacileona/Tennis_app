@@ -8,6 +8,46 @@
     margin: 0;
     background-color: #fff;
   }
+  @media (max-width: 768px) {
+    .header-container {
+      height: 60px;
+    }
+    .header-title {
+      line-height: 60px;
+      font-size: 1.5rem;
+    }
+    .left-menu {
+      width: 150px;
+      top: 60px;
+    }
+    .main-content, .container {
+      margin-left: 150px;
+      margin-top: 60px;
+    }
+  }
+  @media (min-width: 992px) {
+    /* Custom styles for desktops can be added here if needed */
+  }
+
+  /* Hide the hamburger on medium screens and up */
+@media (min-width: 768px) {
+  .left-menu {
+    display: block;
+  }
+  button[data-bs-toggle="offcanvas"] {
+    display: none;
+  }
+}
+
+/* Hide the fixed left menu on smaller screens */
+@media (max-width: 767px) {
+  .left-menu {
+    display: none;
+  }
+}
+
+  
+
   
   /* ===== HEADER STYLES ===== */
   .header-container {

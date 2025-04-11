@@ -2,45 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Ensure responsive scaling on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tennis App - {% block title %}{% endblock %}</title>
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome (if needed) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <p>Role: {{ session.get('role') }}</p>
-  <div class="container-fluid tennis-app-container">
-    {# Render flash messages only if hide_flashes is not set or is false #}
-    {% if not hide_flashes %}
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+  <!-- Header with clay court background -->
+  <div class="header-container" style="position: fixed; top: 0; left: 0; right: 0; height: 80px; background: url('https://images.unsplash.com/photo-1605875200273-a63d6a51f9e1?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1600&amp;q=80') no-repeat center center/cover; color: #fff; z-index: 1050;">
+    <div class="header-title" style="text-align: center; line-height: 80px; font-size: 1.8rem; font-weight: bold;">
+      Sebastian Championship 2025
+    </div>
+    <div class="user-info" style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem;">
+      <span>Welcome, <strong><a href="{{ url_for('profile') }}" style="color: #fff; text-decoration: underline;">{{ session.get('username') }}</a></strong></span>
+      <a href="{{ url_for('logout') }}" class="logout-btn" style="background-color: #dc3545; border: none; padding: 0.5rem 1rem; color: #fff; border-radius: 5px; cursor: pointer; font-size: 1rem; text-decoration: none;">Logout</a>
+    </div>
+  </div>
+
+  <!-- Offcanvas Toggle Button (Visible on small screens only) -->
+  <button class="btn btn-dark d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" style="position: fixed; top: 80px; left: 0; z-index: 1200;">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Offcanvas Menu for Mobile (hidden on md and up) -->
+  <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <a href="#" class="text-white d-block mb-2">Results</a>
+      <a href="#" class="text-white d-block mb-2">Upcoming</a>
+      <a href="#" class="text-white d-block mb-2">Add New Score</a>
+      <a href="#" class="text-white d-block mb-2">Add Match to Upcoming</a>
+      <a href="#" class="text-white d-block mb-2">Search</a>
+      <a href="#" class="text-white d-block mb-2">Information</a>
+      <a href="#" class="text-white d-block mb-2">Contact</a>
+      {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="text-decoration-underline fw-bold d-block mt-2 text-white">Admin</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Left-hand side menu (visible on medium screens and up) -->
+  <div class="left-menu" style="position: fixed; top: 80px; left: 0; width: 180px; background-color: #343a40; padding: 1rem; overflow-y: auto; z-index: 1040;">
+    <a href="#" style="display: block; color: #fff; text-decoration: none; margin: 0.5rem 0; padding: 0.5rem; border-radius: 5px;">Results</a>
+    <a href="#" style="display: block; color: #fff; text-decoration: none; margin: 0.5rem 0; padding: 0.5rem; border-radius: 5px;">Upcoming</a>
+    <a href="#" style="display: block; color: #fff; text-decoration: none; margin: 0.5rem 0; padding: 0.5rem; border-radius: 5px;">Add New Score</a>
+    <a href="#" style="display: block; color: #fff; text-decoration: none; margin: 0.5rem 0; padding: 0.5rem; border-radius: 5px;">Add Match to Upcoming</a>
+    <a href="#" style="display: block; color: #fff; text-decoration: none; margin: 0.5rem 0; padding: 0.5rem; border-radius: 5px;">Search</a>
+    <a href="#" style="display: block; color: #fff; text-decoration: none; margin: 0.5rem 0; padding: 0.5rem; border-radius: 5px;">Information</a>
+    <a href="#" style="display: block; color: #fff; text-decoration: none; margin: 0.5rem 0; padding: 0.5rem; border-radius: 5px;">Contact</a>
+    {% if session.get('role') == 'admin' %}
+      <a href="{{ url_for('admin_dashboard') }}" class="admin-menu">Admin</a>
     {% endif %}
-    
+  </div>
+
+  <!-- Main content area: positioned to the right of the left menu -->
+  <div style="position: absolute; top: 80px; left: 180px; right: 0; padding: 1rem;">
     {% block content %}{% endblock %}
   </div>
-  
+
+  <!-- Bootstrap JS Bundle (with Popper) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Auto-hide flash messages after 4 seconds
-    window.setTimeout(function() {
-      var alerts = document.querySelectorAll('.alert');
-      alerts.forEach(function(alert) {
-        alert.style.transition = 'opacity 0.5s ease-out';
-        alert.style.opacity = '0';
-        setTimeout(function() {
-          alert.remove();
-        }, 500);
-      });
-    }, 4000);
-  </script>
 </body>
 </html>

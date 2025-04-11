@@ -1,58 +1,95 @@
 {% extends "base.html" %}
-{% block title %}Landing Page{% endblock %}
+{% block title %}Tennis App - Landing Page{% endblock %}
 {% block content %}
-<!-- Header with clay court background -->
-<div class="header-container">
-  <div class="header-title">Sebastian Championship 2025</div>
-  <div class="user-info">
-    <span>Welcome, <strong><a href="/profile" style="color: #fff; text-decoration: underline;">tomislav.markac</a></strong></span>
-    <a href="/logout" class="logout-btn">Logout</a>
-  </div>
-</div>
+<!-- Landing Page Tabs -->
+<ul class="nav nav-tabs" id="landingTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <!-- Competitions Tab -->
+    <button class="nav-link active" id="competitions-tab" data-bs-toggle="tab" data-bs-target="#competitions" type="button" role="tab" aria-controls="competitions" aria-selected="true">
+      Competitions
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <!-- Player Stats Tab -->
+    <button class="nav-link" id="playerstats-tab" data-bs-toggle="tab" data-bs-target="#playerstats" type="button" role="tab" aria-controls="playerstats" aria-selected="false">
+      Player Stats
+    </button>
+  </li>
+</ul>
 
-<!-- Left-hand side menu -->
-<div class="left-menu">
-  <a href="#">Rezultati</a>
-  <a href="#">Najave</a>
-  <a href="#">Dodaj rezultat</a>
-  <a href="#">Najavi meč</a>
-  <a href="#">Traži</a>
-  <a href="#">Informacije</a>
-  <a href="#">Kontakt</a>
-  {% if session.get('role') == 'admin' %}
-    <a href="{{ url_for('admin_dashboard') }}" class="admin-menu">Admin</a>
-  {% endif %}
-</div>
-
-<!-- Main content area -->
-<div class="main-content">
-  <h2>Player Stats</h2>
-  <!-- Table with six columns and 10 empty rows -->
-  <div class="table-responsive">
-    <table class="table table-striped table-bordered">
-      <thead>
-        <tr>
-          <th>Igrač</th>
-          <th>Odigrano</th>
-          <th>Pobjede</th>
-          <th>Setovi</th>
-          <th>Gemovi</th>
-          <th>Bodovi</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for i in range(10) %}
-        <tr>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-          <td>&nbsp;</td>
-        </tr>
+<div class="tab-content mt-3" id="landingTabsContent">
+  <!-- Competitions Tab Content -->
+  <div class="tab-pane fade show active" id="competitions" role="tabpanel" aria-labelledby="competitions-tab">
+    <h2>Competitions</h2>
+    {% if competitions %}
+      <ul class="nav nav-tabs mt-3" id="compNestedTabs" role="tablist">
+        {% for comp in competitions %}
+          <li class="nav-item" role="presentation">
+            <button class="nav-link {% if loop.first %}active{% endif %}" id="comp-{{ comp.id }}-subtab" data-bs-toggle="tab" data-bs-target="#comp-{{ comp.id }}-sub" type="button" role="tab" aria-controls="comp-{{ comp.id }}-sub" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
+              {{ comp.name }}
+            </button>
+          </li>
         {% endfor %}
-      </tbody>
-    </table>
+      </ul>
+      <div class="tab-content mt-3" id="compNestedTabsContent">
+        {% for comp in competitions %}
+          <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="comp-{{ comp.id }}-sub" role="tabpanel" aria-labelledby="comp-{{ comp.id }}-subtab">
+            <h3 class="mb-3">{{ comp.name }}</h3>
+            {% set groupLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+            {% for i in range(comp.num_groups) %}
+              {% set groupName = "Group " ~ groupLetters[i] %}
+              <h4>{{ groupName }}</h4>
+              <table class="table table-striped table-bordered" style="width: 100%; margin-bottom: 1rem;">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Player Name</th>
+                    <th>Year of Birth</th>
+                    <th>Total Matches</th>
+                    <th>Win</th>
+                    <th>Loss</th>
+                    <th>Win %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% set assignments_for_group = assignments.get(comp.id, {}).get(i, []) %}
+                  {% for r in range(comp.max_players) %}
+                    {% if r < assignments_for_group|length %}
+                      {% set assign = assignments_for_group[r] %}
+                      {% set assigned_player = (all_possible_players | selectattr("id", "equalto", assign.user_id) | list)[0] %}
+                      <tr>
+                        <td>
+                          <a href="{{ url_for('profile_by_username', username=assigned_player.username) }}" style="text-decoration: none;">
+                            {{ assigned_player.last_name }}, {{ assigned_player.first_name }}
+                          </a>
+                        </td>
+                        <td>{{ assigned_player.birth_year }}</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0%</td>
+                      </tr>
+                    {% else %}
+                      <tr>
+                        <td colspan="6" class="text-center">Empty Slot</td>
+                      </tr>
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No competitions available.</p>
+    {% endif %}
+  </div>
+  
+  <!-- Player Stats Tab Content -->
+  <div class="tab-pane fade" id="playerstats" role="tabpanel" aria-labelledby="playerstats-tab">
+    <h2>Player Stats</h2>
+    <p>Player statistics content goes here.</p>
+    {# Insert your actual player stats content here #}
   </div>
 </div>
 {% endblock %}
