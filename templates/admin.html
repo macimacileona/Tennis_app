@@ -7,30 +7,27 @@
   <div class="position-absolute" style="top: 0; right: 0;">
     <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Landing Page</a>
   </div>
-  
+
   <h2 class="mt-3">Admin Dashboard</h2>
-  
-  <!-- Primary Outer Tabs: Users, Players, Create Competition -->
+
+  <!-- Primary Outer Tabs: Users, Players, Create Competition, Results -->
   <ul class="nav nav-tabs" id="adminTab" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link {% if active_tab=='users' %}active{% endif %}" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="{% if active_tab=='users' %}true{% else %}false{% endif %}">
-        Users
-      </button>
+      <button class="nav-link {% if active_tab=='users' %}active{% endif %}" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="{% if active_tab=='users' %}true{% else %}false{% endif %}">Users</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link {% if active_tab=='players' %}active{% endif %}" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button" role="tab" aria-controls="players" aria-selected="{% if active_tab=='players' %}true{% else %}false{% endif %}">
-        Players
-      </button>
+      <button class="nav-link {% if active_tab=='players' %}active{% endif %}" id="players-tab" data-bs-toggle="tab" data-bs-target="#players" type="button" role="tab" aria-controls="players" aria-selected="{% if active_tab=='players' %}true{% else %}false{% endif %}">Players</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link {% if active_tab=='competition' %}active{% endif %}" id="competition-tab" data-bs-toggle="tab" data-bs-target="#competition" type="button" role="tab" aria-controls="competition" aria-selected="{% if active_tab=='competition' %}true{% else %}false{% endif %}">
-        Create Competition
-      </button>
+      <button class="nav-link {% if active_tab=='competition' %}active{% endif %}" id="competition-tab" data-bs-toggle="tab" data-bs-target="#competition" type="button" role="tab" aria-controls="competition" aria-selected="{% if active_tab=='competition' %}true{% else %}false{% endif %}">Create Competition</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link {% if active_tab=='results' %}active{% endif %}" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab" aria-controls="results" aria-selected="{% if active_tab=='results' %}true{% else %}false{% endif %}">Results</button>
     </li>
   </ul>
-  
+
   <div class="tab-content" id="adminTabContent">
-    <!-- Users Tab -->
+    <!-- Users Tab Content (unchanged) -->
     <div class="tab-pane fade {% if active_tab=='users' %}show active{% endif %}" id="users" role="tabpanel" aria-labelledby="users-tab">
       <div class="table-responsive mt-3">
         <table class="table table-striped table-bordered">
@@ -72,8 +69,8 @@
         </table>
       </div>
     </div>
-    
-    <!-- Players Tab -->
+
+    <!-- Players Tab Content (unchanged) -->
     <div class="tab-pane fade {% if active_tab=='players' %}show active{% endif %}" id="players" role="tabpanel" aria-labelledby="players-tab">
       <div class="table-responsive mt-3">
         <table class="table table-striped table-bordered">
@@ -115,33 +112,28 @@
         </table>
       </div>
     </div>
-    
-    <!-- Create Competition Tab -->
+
+    <!-- Create Competition Tab Content (unchanged) -->
     <div class="tab-pane fade {% if active_tab=='competition' %}show active{% endif %}" id="competition" role="tabpanel" aria-labelledby="competition-tab">
       <div class="mt-3">
         <p>Total number of players: <strong>{{ participants|length }}</strong></p>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#competitionModal">Create Competition</button>
       </div>
       <hr>
-      <!-- Nested tabs for competitions: each competition in its own tab -->
       {% if competitions %}
       <ul class="nav nav-tabs mt-3" id="compNav" role="tablist">
         {% for comp in competitions %}
         <li class="nav-item" role="presentation">
-          <button class="nav-link {% if loop.first %}active{% endif %}" id="comp-{{ comp.id }}-tab" data-bs-toggle="tab" data-bs-target="#comp-{{ comp.id }}" type="button" role="tab" aria-controls="comp-{{ comp.id }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-            {{ comp.name }}
-          </button>
+          <button class="nav-link {% if loop.first %}active{% endif %}" id="comp-{{ comp.id }}-tab" data-bs-toggle="tab" data-bs-target="#comp-{{ comp.id }}" type="button" role="tab" aria-controls="comp-{{ comp.id }}" aria-selected="{% if loop.first %}true{% else %}false{% endif %}">{{ comp.name }}</button>
         </li>
         {% endfor %}
       </ul>
       <div class="tab-content mt-3" id="compNavContent">
         {% for comp in competitions %}
         <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="comp-{{ comp.id }}" role="tabpanel" aria-labelledby="comp-{{ comp.id }}-tab">
-          <!-- Delete Competition button -->
           <div class="mb-3">
             <button class="btn btn-danger btn-sm delete-competition-btn" data-comp-id="{{ comp.id }}">Delete Competition</button>
           </div>
-          {# Calculate assigned IDs for this competition across all groups #}
           {% set assigned_ids = [] %}
           {% if assignments.get(comp.id) %}
             {% for group_assignments in assignments.get(comp.id).values() %}
@@ -156,7 +148,6 @@
           {% for i in range(comp.num_groups) %}
           {% set groupName = "Group " ~ groupLetters[i] %}
           <div class="group-container mt-4" data-competition-id="{{ comp.id }}" data-group-index="{{ i }}">
-            <!-- Dropdown list of players, excluding those already assigned in this competition -->
             <div class="d-flex align-items-center mb-2">
               <h5 class="mb-0 me-2">{{ groupName }}</h5>
               <select class="form-select player-dropdown" style="max-width: 300px;">
@@ -212,8 +203,8 @@
       {% else %}
       <p>No competitions created yet.</p>
       {% endif %}
-      
-      <!-- Bootstrap Modal for Competition Creation Form -->
+
+      <!-- Create Competition Modal -->
       <div class="modal fade" id="competitionModal" tabindex="-1" aria-labelledby="competitionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -245,177 +236,396 @@
         </div>
       </div>
     </div> <!-- End Create Competition Tab -->
+
+    <!-- RESULTS TAB Content -->
+    <div class="tab-pane fade {% if active_tab=='results' %}show active{% endif %}" id="results" role="tabpanel" aria-labelledby="results-tab">
+      <div class="mt-3">
+        <h3>Results</h3>
+        <div class="table-responsive mt-3">
+          <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Match Type</th>
+                <th>Date</th>
+                <th>Match</th>
+                <th>Result</th>
+                <th>Sets</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for res in results %}
+              <tr id="result-{{ res.id }}">
+                <td>{{ res.tournament }}</td>
+                <td>{{ res.match_date }}</td>
+                <td>
+                  <a href="{{ url_for('profile_by_username', username=res.first_player.username) }}">
+                    {{ res.first_player.first_name }} {{ res.first_player.last_name }}
+                  </a>
+                   -
+                  <a href="{{ url_for('profile_by_username', username=res.second_player.username) }}">
+                    {{ res.second_player.first_name }} {{ res.second_player.last_name }}
+                  </a>
+                </td>
+                <td>{{ res.result }}</td>
+                <td>{{ res.sets }}</td>
+                <td>
+                  <button class="btn btn-sm btn-primary edit-result-btn"
+                          data-result-id="{{ res.id }}"
+                          data-match-date="{{ res.match_date }}"
+                          data-match-type="{% if res.tournament|lower == 'friendly' %}friendly{% else %}{% for comp in competitions %}{% if comp.name == res.tournament %}{{ comp.id }}{% endif %}{% endfor %}{% endif %}"
+                          data-first-player-id="{{ res.first_player_id }}"
+                          data-second-player-id="{{ res.second_player_id }}"
+                          data-first-score-set1="{{ res.first_score_set1 }}"
+                          data-first-score-set2="{{ res.first_score_set2 }}"
+                          data-first-score-set3="{{ res.first_score_set3 if res.first_score_set3 is not none else '' }}"
+                          data-second-score-set1="{{ res.second_score_set1 }}"
+                          data-second-score-set2="{{ res.second_score_set2 }}"
+                          data-second-score-set3="{{ res.second_score_set3 if res.second_score_set3 is not none else '' }}">
+                    Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger delete-result-btn" data-result-id="{{ res.id }}">Delete</button>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="text-center">No results available yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- Inline JavaScript for Player Assignment, Removal, and Competition Deletion -->
+<!-- EDIT RESULT MODAL (using static backdrop to keep it open) -->
+<div class="modal fade" id="editResultModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="editResultModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="max-width:800px;">
+    <div class="register-card card" style="max-width:100%;">
+      <div class="card-header bg-success text-white">
+        <h3 class="text-center"><i class="fas fa-pencil-alt me-2"></i>Edit Score</h3>
+      </div>
+      <div class="card-body">
+        <form id="editResultForm" method="POST" action="">
+          <!-- Date Field -->
+          <div class="mb-3 d-flex align-items-center">
+            <label for="edit_match_date" class="fw-bold me-2" style="min-width:150px;">Match Date</label>
+            <div>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                <input type="date" class="form-control form-control-lg" id="edit_match_date" name="match_date" required>
+              </div>
+            </div>
+          </div>
+          <!-- Match Type Field -->
+          <div class="mb-3 d-flex align-items-center">
+            <label for="edit_match_type" class="fw-bold me-2" style="min-width:150px;">Match Type</label>
+            <div>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-trophy"></i></span>
+                <select class="form-select form-control-lg" id="edit_match_type" name="match_type" required>
+                  <option value="" disabled>Select Match Type</option>
+                  {% for comp in competitions %}
+                    <option value="{{ comp.id }}">{{ comp.name }}</option>
+                  {% endfor %}
+                  <option value="friendly">Friendly</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- First Player & Scores -->
+          <div class="mb-3 d-flex align-items-center">
+            <label for="edit_first_player" class="fw-bold me-2" style="min-width:150px;">First Player</label>
+            <select class="form-select form-select-lg me-2" id="edit_first_player" name="first_player" style="width:480px;" required>
+              <!-- Options populated via JavaScript -->
+            </select>
+            <select class="form-select form-select-lg me-2" id="edit_first_score_set1" name="first_score_set1" style="width:80px;" required>
+              <option value="" disabled selected>Set 1</option>
+              {% for i in range(0,8) %}
+                <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+            <select class="form-select form-select-lg me-2" id="edit_first_score_set2" name="first_score_set2" style="width:80px;" required>
+              <option value="" disabled selected>Set 2</option>
+              {% for i in range(0,8) %}
+                <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+            <select class="form-select form-select-lg" id="edit_first_score_set3" name="first_score_set3" style="width:80px;">
+              <option value="" disabled selected>Set 3</option>
+              {% for i in range(0,31) %}
+                <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <!-- Second Player & Scores -->
+          <div class="mb-3 d-flex align-items-center">
+            <label for="edit_second_player" class="fw-bold me-2" style="min-width:150px;">Second Player</label>
+            <select class="form-select form-select-lg me-2" id="edit_second_player" name="second_player" style="width:480px;" required>
+              <!-- Options populated via JavaScript -->
+            </select>
+            <select class="form-select form-select-lg me-2" id="edit_second_score_set1" name="second_score_set1" style="width:80px;" required>
+              <option value="" disabled selected>Set 1</option>
+              {% for i in range(0,8) %}
+                <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+            <select class="form-select form-select-lg me-2" id="edit_second_score_set2" name="second_score_set2" style="width:80px;" required>
+              <option value="" disabled selected>Set 2</option>
+              {% for i in range(0,8) %}
+                <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+            <select class="form-select form-select-lg" id="edit_second_score_set3" name="second_score_set3" style="width:80px;">
+              <option value="" disabled selected>Set 3</option>
+              {% for i in range(0,31) %}
+                <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <!-- Hidden Field for Result ID -->
+          <input type="hidden" id="edit_result_id" name="result_id">
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button type="button" class="btn btn-secondary btn-lg px-5" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success btn-lg px-5">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteResultModal" tabindex="-1" aria-labelledby="deleteResultModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteResultModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this entry?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteResult">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Initialize competitionsJS and allPossiblePlayers for JS use -->
 <script>
-// all_possible_players is passed as JSON from the backend.
-var allPossiblePlayers = {{ all_possible_players|tojson }};
+  var competitionsJS = {{ competitions_js|tojson }};
+  var allPossiblePlayers = {{ all_possible_players|tojson }};
+</script>
 
-// Function to send assignment via AJAX to persist in the database.
-function assignPlayerToGroup(competitionId, groupIndex, playerId) {
-  return fetch("{{ url_for('assign_player') }}", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      competition_id: competitionId,
-      group_index: groupIndex,
-      user_id: playerId
-    })
-  }).then(response => response.json());
-}
-
-// Function to send removal of an assignment via AJAX.
-function removeAssignment(competitionId, groupIndex, playerId) {
-  return fetch("{{ url_for('remove_assignment') }}", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      competition_id: competitionId,
-      group_index: groupIndex,
-      user_id: playerId
-    })
-  }).then(response => response.json());
-}
-
-// Function to send deletion of a competition via AJAX.
-function deleteCompetition(compId) {
-  return fetch(`/delete-competition/${compId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  }).then(response => response.json());
-}
-
-// Attach event listeners for each group container (for adding players).
-document.querySelectorAll(".group-container").forEach(function(groupContainer) {
-  groupContainer.querySelector(".add-player-btn").addEventListener("click", function() {
-    var dropdown = groupContainer.querySelector(".player-dropdown");
-    var playerId = dropdown.value;
-    if (!playerId) {
-      alert("Please select a player.");
-      return;
-    }
-    var competitionId = groupContainer.getAttribute("data-competition-id");
-    var groupIndex = groupContainer.getAttribute("data-group-index");
-    var player = allPossiblePlayers.find(function(p) {
-      return parseInt(p.id) === parseInt(playerId);
+<!-- Inline JavaScript for Edit/Delete handling and competition assignments -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Helper function to populate player select options.
+  function populatePlayerSelect(selectEl, selectedId, excludeId) {
+    selectEl.innerHTML = '';
+    var defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.text = "Select Player";
+    selectEl.appendChild(defaultOpt);
+    allPossiblePlayers.forEach(function(player) {
+      if (excludeId && parseInt(player.id) === parseInt(excludeId)) return;
+      var opt = document.createElement("option");
+      opt.value = player.id;
+      opt.text = player.last_name + ", " + player.first_name;
+      selectEl.appendChild(opt);
     });
-    if (!player) {
-      alert("Player not found.");
-      return;
+    if (selectedId) {
+      selectEl.value = selectedId;
     }
-    assignPlayerToGroup(competitionId, groupIndex, playerId).then(function(data) {
-      if (data.status === "success") {
-        var newRow = document.createElement("tr");
-        newRow.setAttribute("data-player-id", playerId);
-        newRow.innerHTML = `
-          <td>${player.last_name}, ${player.first_name}</td>
-          <td>${player.birth_year}</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0%</td>
-          <td>
-            <button class="btn btn-sm btn-warning remove-assigned-btn">Remove</button>
-          </td>
-        `;
-        var tbody = groupContainer.querySelector(".group-table tbody");
-        var emptyRow = tbody.querySelector("tr.group-slot");
-        if (emptyRow) {
-          tbody.replaceChild(newRow, emptyRow);
-        } else {
-          alert("No empty slots available in this group.");
-        }
-        // Remove this player's option from all dropdowns in this competition.
-        var compDropdowns = document.querySelectorAll(`.group-container[data-competition-id="${competitionId}"] .player-dropdown`);
-        compDropdowns.forEach(function(drop) {
-          drop.querySelectorAll("option").forEach(function(opt) {
-            if (parseInt(opt.value) === parseInt(playerId)) {
-              opt.remove();
-            }
-          });
-        });
-        dropdown.selectedIndex = 0;
-      } else {
-        alert(data.message || "Failed to assign player.");
-      }
-    }).catch(function(err) {
-      console.error(err);
-      alert("Error occurred while assigning player.");
+  }
+
+  var currentResultId = null;
+
+  // Edit Result button handling.
+  document.querySelectorAll(".edit-result-btn").forEach(function(button) {
+    button.addEventListener("click", function() {
+      currentResultId = button.getAttribute("data-result-id");
+      document.getElementById("edit_result_id").value = currentResultId;
+      // Set Match Date.
+      document.getElementById("edit_match_date").value = button.getAttribute("data-match-date");
+      // Set Match Type.
+      var mt = button.getAttribute("data-match-type");
+      if (mt) { mt = mt.trim(); document.getElementById("edit_match_type").value = mt; }
+      // Populate Player Dropdowns.
+      var firstPlayerId = button.getAttribute("data-first-player-id");
+      var secondPlayerId = button.getAttribute("data-second-player-id");
+      var editFirstPlayerSelect = document.getElementById("edit_first_player");
+      var editSecondPlayerSelect = document.getElementById("edit_second_player");
+      populatePlayerSelect(editFirstPlayerSelect, firstPlayerId, null);
+      populatePlayerSelect(editSecondPlayerSelect, secondPlayerId, firstPlayerId);
+      // Populate Score Dropdowns.
+      document.getElementById("edit_first_score_set1").value = button.getAttribute("data-first-score-set1");
+      document.getElementById("edit_first_score_set2").value = button.getAttribute("data-first-score-set2");
+      document.getElementById("edit_first_score_set3").value = button.getAttribute("data-first-score-set3");
+      document.getElementById("edit_second_score_set1").value = button.getAttribute("data-second-score-set1");
+      document.getElementById("edit_second_score_set2").value = button.getAttribute("data-second-score-set2");
+      document.getElementById("edit_second_score_set3").value = button.getAttribute("data-second-score-set3");
+      // Set the form's action URL.
+      document.getElementById("editResultForm").action = "/edit_result/" + currentResultId;
+      // Show the edit modal.
+      var editModal = new bootstrap.Modal(document.getElementById('editResultModal'));
+      editModal.show();
     });
   });
-  
-  // Attach event listener for removal of assigned players.
-  groupContainer.addEventListener("click", function(e) {
-    if (e.target && e.target.classList.contains("remove-assigned-btn")) {
-      var tr = e.target.closest("tr");
-      var removedPlayerId = tr.getAttribute("data-player-id");
+
+  // Delete Result button handling.
+  document.querySelectorAll(".delete-result-btn").forEach(function(button) {
+    button.addEventListener("click", function() {
+      currentResultId = button.getAttribute("data-result-id");
+      var deleteModal = new bootstrap.Modal(document.getElementById('deleteResultModal'));
+      deleteModal.show();
+    });
+  });
+
+  document.getElementById("confirmDeleteResult").addEventListener("click", function() {
+    // Create and submit a dynamic form to send the POST request.
+    var form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/delete_result/" + currentResultId;
+    document.body.appendChild(form);
+    form.submit();
+  });
+
+  // Competition assignments (unchanged).
+  document.querySelectorAll(".group-container").forEach(function(groupContainer) {
+    groupContainer.querySelector(".add-player-btn").addEventListener("click", function() {
+      var dropdown = groupContainer.querySelector(".player-dropdown");
+      var playerId = dropdown.value;
+      if (!playerId) {
+        alert("Please select a player.");
+        return;
+      }
       var competitionId = groupContainer.getAttribute("data-competition-id");
       var groupIndex = groupContainer.getAttribute("data-group-index");
-      removeAssignment(competitionId, groupIndex, removedPlayerId).then(function(data) {
+      var player = allPossiblePlayers.find(function(p) {
+        return parseInt(p.id) === parseInt(playerId);
+      });
+      if (!player) {
+        alert("Player not found.");
+        return;
+      }
+      assignPlayerToGroup(competitionId, groupIndex, playerId).then(function(data) {
         if (data.status === "success") {
-          var emptyRow = document.createElement("tr");
-          emptyRow.classList.add("group-slot");
-          emptyRow.innerHTML = `<td colspan="7" class="text-center">Empty Slot</td>`;
-          tr.parentNode.replaceChild(emptyRow, tr);
-          // Re-add the removed player's option to all dropdowns in this competition.
+          var newRow = document.createElement("tr");
+          newRow.setAttribute("data-player-id", playerId);
+          newRow.innerHTML = `
+            <td>${player.last_name}, ${player.first_name}</td>
+            <td>${player.birth_year}</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0%</td>
+            <td>
+              <button class="btn btn-sm btn-warning remove-assigned-btn">Remove</button>
+            </td>
+          `;
+          var tbody = groupContainer.querySelector(".group-table tbody");
+          var emptyRow = tbody.querySelector("tr.group-slot");
+          if (emptyRow) {
+            tbody.replaceChild(newRow, emptyRow);
+          } else {
+            alert("No empty slots available in this group.");
+          }
           var compDropdowns = document.querySelectorAll(`.group-container[data-competition-id="${competitionId}"] .player-dropdown`);
           compDropdowns.forEach(function(drop) {
-            var exists = Array.from(drop.options).some(function(opt) {
-              return parseInt(opt.value) === parseInt(removedPlayerId);
-            });
-            if (!exists) {
-              var removedPlayer = allPossiblePlayers.find(function(p) {
-                return parseInt(p.id) === parseInt(removedPlayerId);
-              });
-              if (removedPlayer) {
-                var newOption = document.createElement("option");
-                newOption.value = removedPlayer.id;
-                newOption.text = removedPlayer.last_name + ", " + removedPlayer.first_name;
-                drop.appendChild(newOption);
+            drop.querySelectorAll("option").forEach(function(opt) {
+              if (parseInt(opt.value) === parseInt(playerId)) {
+                opt.remove();
               }
-            }
+            });
           });
+          dropdown.selectedIndex = 0;
         } else {
-          alert(data.message || "Failed to remove assigned player.");
+          alert(data.message || "Failed to assign player.");
         }
       }).catch(function(err) {
         console.error(err);
-        alert("Error occurred while removing assigned player.");
+        alert("Error occurred while assigning player.");
       });
-    }
-  });
-});
+    });
 
-// Attach event listeners for Delete Competition buttons.
-document.querySelectorAll(".delete-competition-btn").forEach(function(btn) {
-  btn.addEventListener("click", function() {
-    var compId = btn.getAttribute("data-comp-id");
-    var confirmDelete = confirm("Are you sure you want to delete this competition? This will delete all associated data.");
-    if (!confirmDelete) return;
-    deleteCompetition(compId).then(function(data) {
-      if (data.status === "success") {
-        // Remove the competition tab header and content from the DOM.
-        var headerBtn = document.getElementById("comp-" + compId + "-tab");
-        var contentPane = document.getElementById("comp-" + compId);
-        if (headerBtn) headerBtn.parentNode.remove();
-        if (contentPane) contentPane.parentNode.removeChild(contentPane);
-        alert("Competition deleted successfully.");
-      } else {
-        alert(data.message || "Failed to delete competition.");
+    groupContainer.addEventListener("click", function(e) {
+      if (e.target && e.target.classList.contains("remove-assigned-btn")) {
+        var tr = e.target.closest("tr");
+        var removedPlayerId = tr.getAttribute("data-player-id");
+        var competitionId = groupContainer.getAttribute("data-competition-id");
+        var groupIndex = groupContainer.getAttribute("data-group-index");
+        removeAssignment(competitionId, groupIndex, removedPlayerId).then(function(data) {
+          if (data.status === "success") {
+            var emptyRow = document.createElement("tr");
+            emptyRow.classList.add("group-slot");
+            emptyRow.innerHTML = `<td colspan="7" class="text-center">Empty Slot</td>`;
+            tr.parentNode.replaceChild(emptyRow, tr);
+            var compDropdowns = document.querySelectorAll(`.group-container[data-competition-id="${competitionId}"] .player-dropdown`);
+            compDropdowns.forEach(function(drop) {
+              var exists = Array.from(drop.options).some(function(opt) {
+                return parseInt(opt.value) === parseInt(removedPlayerId);
+              });
+              if (!exists) {
+                var removedPlayer = allPossiblePlayers.find(function(p) {
+                  return parseInt(p.id) === parseInt(removedPlayerId);
+                });
+                if (removedPlayer) {
+                  var newOption = document.createElement("option");
+                  newOption.value = removedPlayer.id;
+                  newOption.text = removedPlayer.last_name + ", " + removedPlayer.first_name;
+                  drop.appendChild(newOption);
+                }
+              }
+            });
+          } else {
+            alert(data.message || "Failed to remove assigned player.");
+          }
+        }).catch(function(err) {
+          console.error(err);
+          alert("Error occurred while removing assigned player.");
+        });
       }
-    }).catch(function(err) {
-      console.error(err);
-      alert("Error occurred while deleting competition.");
     });
   });
+
+  function assignPlayerToGroup(competitionId, groupIndex, playerId) {
+    return fetch("{{ url_for('assign_player') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        competition_id: competitionId,
+        group_index: groupIndex,
+        user_id: playerId
+      })
+    }).then(response => response.json());
+  }
+
+  function removeAssignment(competitionId, groupIndex, playerId) {
+    return fetch("{{ url_for('remove_assignment') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        competition_id: competitionId,
+        group_index: groupIndex,
+        user_id: playerId
+      })
+    }).then(response => response.json());
+  }
+
+  function deleteCompetition(compId) {
+    return fetch(`/delete-competition/${compId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    }).then(response => response.json());
+  }
 });
 </script>
 {% endblock %}

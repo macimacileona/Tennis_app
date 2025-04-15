@@ -1,0 +1,13 @@
+<!-- enter_results.html -->
+<form action="/submit_result" method="POST">
+    <label for="competition">Competition:</label>
+    <select id="competition" name="competition" required>
+      <option value="">--Select Competition--</option>
+      {% for comp in competitions %}
+        <option value="{{ comp.id }}">{{ comp.name }}</option>
+      {% endfor %}
+    </select>
+  
+    <button type="submit">Submit</button>
+  </form>
+  
